@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrar – DevDocs IA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg:#07070a; --surface:#0e0e12; --ink:#f4f4f6; --muted:#9a9aa4; --line:#26262e; --brand:#e5192b; --brand-soft:rgba(229,25,43,.14); --err:#ff6b78; }
+    
+    * { box-sizing:border-box; } body { margin:0; min-height:100vh; display:grid; place-items:center; padding:20px; background:radial-gradient(700px circle at 50% -10%,rgba(229,25,43,.22),transparent 60%),var(--bg); color:var(--ink); font-family:"Inter",sans-serif; }
+    .card { width:100%; max-width:410px; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:30px 26px; box-shadow:0 30px 80px -30px #000,0 0 70px -34px rgba(229,25,43,.7); position:relative; overflow:hidden; animation:rise .6s cubic-bezier(.2,.7,.2,1) both; }
+    .brand { display:flex; align-items:center; gap:10px; margin-bottom:22px; } .mark { width:32px; height:32px; display:grid; place-items:center; border-radius:8px; background:var(--brand); color:#fff; box-shadow:0 6px 22px -6px rgba(229,25,43,.6); font:600 12px "JetBrains Mono",monospace; letter-spacing:-.05em; }
+    h1 { font-weight:650; letter-spacing:-.03em; font-size:26px; margin:0 0 4px; } p.sub { margin:0 0 20px; color:var(--muted); font-size:13px; }
+    .tabs { display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; background:var(--bg); border-radius:11px; margin-bottom:18px; }
+    .tabs button { border:0; padding:9px; border-radius:8px; background:transparent; color:var(--muted); font:600 13px "Inter",system-ui,sans-serif; cursor:pointer; } .tabs button.on { background:var(--surface); color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.1); }
+    label { display:block; font-size:12px; font-weight:600; margin:12px 0 5px; } input { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink); font:14px "Inter",system-ui,sans-serif; outline:0; } input:focus { border-color:var(--ink); box-shadow:0 0 0 3px var(--brand-soft); } 
+    .go { width:100%; margin-top:18px; padding:11px; border:0; border-radius:6px; background:var(--brand); color:#fff; font:700 14px "Inter",system-ui,sans-serif; cursor:pointer; } .go:disabled { opacity:.6; cursor:wait; }
+    .err { min-height:18px; margin-top:12px; color:var(--err); font-size:12px; } .hint { margin-top:14px; color:var(--muted); font-size:11px; line-height:1.5; } .hidden { display:none; }
+    .card::before { content:""; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--brand),transparent); animation:sweep 3s ease-in-out infinite; }
+    @keyframes sweep { 0%,100% { transform:translateX(-60%); opacity:.4; } 50% { transform:translateX(60%); opacity:1; } }
+    @keyframes rise { from { opacity:0; transform:translateY(16px); } }
+    .go { position:relative; overflow:hidden; box-shadow:0 10px 26px -10px rgba(229,25,43,.7); transition:transform .2s, background .2s; } .go:hover:not(:disabled) { transform:translateY(-1px); } .go:active { transform:scale(.98); }
+    .go::after { content:""; position:absolute; top:0; left:-60%; width:40%; height:100%; background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent); transform:skewX(-20deg); transition:left .6s; } .go:hover::after { left:130%; }
+    .tabs button { transition:.2s; } .tabs button.on { background:var(--brand); color:#fff; box-shadow:none; }
+    input { transition:border-color .2s, box-shadow .2s; } .hint b { color:var(--brand); }
+    #nameWrap,#confirmWrap { animation:rise .35s cubic-bezier(.2,.7,.2,1); }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="brand"><div class="mark">&lt;/&gt;</div><strong>DevDocs IA</strong></div>
+    <h1 id="title">Bem-vindo de volta</h1>
+    <p class="sub" id="sub">Entre para acessar seu workspace.</p>
+    <div class="tabs"><button id="tabLogin" class="on" type="button">Entrar</button><button id="tabRegister" type="button">Criar conta</button></div>
+    <form id="form" autocomplete="on">
+      <div id="nameWrap" class="hidden"><label for="username">Nome de usuário</label><input id="username" autocomplete="username" maxlength="20"></div>
+      <label for="email">E-mail</label><input id="email" type="email" autocomplete="email">
+      <label for="password">Senha</label><input id="password" type="password" autocomplete="current-password">
+      <div id="confirmWrap" class="hidden"><label for="confirm">Confirmar senha</label><input id="confirm" type="password" autocomplete="new-password"></div>
+      <button class="go" id="go" type="submit">Entrar</button>
+      <div class="err" id="err" role="alert"></div>
+    </form>
+    <div class="hint" id="hint">O usuário <b>Hiago</b> é o dono e único administrador. Os demais entram como <b>Usuário</b> e podem ser promovidos a Gerente por ele. Os dados ficam só neste navegador.</div>
+  </main>
+  <script src="auth.js"></script>
+  <script>
+    if (OrbitAuth.current()) location.replace('index.html');
+    let mode = 'login';
+    const $ = (s) => document.querySelector(s);
+    function setMode(m) {
+      mode = m; const reg = m === 'register';
+      $('#tabLogin').classList.toggle('on', !reg); $('#tabRegister').classList.toggle('on', reg);
+      $('#nameWrap').classList.toggle('hidden', !reg); $('#confirmWrap').classList.toggle('hidden', !reg);
+      $('#title').textContent = reg ? 'Criar sua conta' : 'Bem-vindo de volta';
+      $('#sub').textContent = reg ? 'Leva menos de um minuto.' : 'Entre para acessar seu workspace.';
+      $('#go').textContent = reg ? 'Criar conta' : 'Entrar'; $('#err').textContent = '';
+      $('#password').autocomplete = reg ? 'new-password' : 'current-password';
+    }
+    $('#tabLogin').onclick = () => setMode('login'); $('#tabRegister').onclick = () => setMode('register');
+    $('#form').addEventListener('submit', async (e) => {
+      e.preventDefault(); $('#err').textContent = ''; $('#go').disabled = true;
+      try {
+        if (mode === 'register') {
+          if ($('#password').value !== $('#confirm').value) throw new Error('As senhas não coincidem');
+          await OrbitAuth.register({ username: $('#username').value, email: $('#email').value, password: $('#password').value });
+        } else {
+          await OrbitAuth.login({ email: $('#email').value, password: $('#password').value });
+        }
+        location.replace('index.html');
+      } catch (err) { $('#err').textContent = err.message; $('#go').disabled = false; }
+    });
+  </script>
+</body>
+</html>
